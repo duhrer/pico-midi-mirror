@@ -1,15 +1,15 @@
 # Pico MIDI Mirror
 
-MIDI messages with note information are "flipped" around middle C (note 60).
 This is a replacement for an earlier web-based project called [MIDI
-RTL](https://github.com/duhrer/midi-rtl).
+RTL](https://github.com/duhrer/midi-rtl). In that version, MIDI messages with note information were "flipped" around middle C (note 60).
 
 I made the original project largely as a prank to play on people who can sight
 read or who know piano tunes by heart, as the spacing of the naturals and
 flat/sharps no longer lines up with the black and white keys.
 
-If you hook up something like a sequencer as the note input, it should sound a
-bit less strange, as the flip does preserve the spacing between notes.
+The new version flips around note 68 (G Sharp/A flat), so that the white keys
+remain natural and the black keys remain sharps/flats.  If you think of E as C
+and reverse the position of your fingers, you can play mirrored tunes.
 
 This project was cloned from [my template
 repository](https://github.com/duhrer/pico-midi-transformer), see that project
