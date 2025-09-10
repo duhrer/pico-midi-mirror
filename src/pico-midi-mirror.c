@@ -92,9 +92,7 @@ int generate_status_byte (int msNibble, int lsNibble) {
 void transform_and_send_incoming_packet (uint8_t *incoming_packet) {
     uint8_t midi_data[3];
     memcpy(midi_data, incoming_packet + 1, 3);
-    
-    bool send_data = true;
-
+ 
     // Start with the message type
     int type = midi_data[0] >> 4;
 
@@ -103,34 +101,33 @@ void transform_and_send_incoming_packet (uint8_t *incoming_packet) {
     // Force all messages to MIDI channel 0.
     midi_data[0] = generate_status_byte(type, 0);
 
+    bool play_note = true;
+
     switch (type) {
+      // For messages with note data, "Flip" notes around middle C (note 60)
       case MIDI_CIN_NOTE_OFF:
       case MIDI_CIN_NOTE_ON:
       case MIDI_CIN_POLY_KEYPRESS:
       case MIDI_CIN_CHANNEL_PRESSURE:
-        // Pass through note and aftertouch messages without further modification.
-        break;
-      case MIDI_CIN_CONTROL_CHANGE:
-        // Invert the mod wheel
-        if (midi_data[1] == 1) {
-          midi_data[2] = 127 - midi_data[2];
+        // Flip around Middle C.
+        // if (midi_data[1] <= 120) {
+        //   midi_data[1] = 120 - midi_data[1];
+        // }
+
+        // Flip around G sharp so that the white keys remain naturals.
+        if (midi_data[1] >= 9) {
+          midi_data[1] = 136 - midi_data[1];
+        }
+        else {
+          play_note = false;
         }
         break;
-      case MIDI_CIN_PITCH_BEND_CHANGE:
-        // Invert the pitch bend value
-        int raw_value = midi_data[2] << 7 | midi_data[1];
-        int inverted_value = 16383 - raw_value;
-        midi_data[1] = inverted_value & 0x7f;
-        midi_data[2] = (inverted_value >> 7) & 0x7f;
-
-        break;
-      // Strip all other message types such as sysex, clock, etc.
+      // Pass everything else through.
       default:
-        send_data = false;
+        break;
     }
 
-
-    if (send_data) {
+    if (play_note) {
       tud_midi_stream_write(0, midi_data, 3);
     }
 }
